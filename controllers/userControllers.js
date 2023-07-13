@@ -53,4 +53,38 @@ const registerUser = async (req, res) => {
 
 }
 
-module.exports = { registerUser };
+
+const loginUser = async (req, res) => {
+    try {
+
+        const { email, password } = req.body;
+        if (!email) return res.send("Emial is required!")
+        if (!password) return res.send("Password is required!")
+
+
+        const user = await users.findOne({ email: email });
+
+        // console.log("we got the user", user)
+        if (user?.name) {
+            // console.log(password, user.password)
+            const hashedPassword = await bcrypt.compare(password, user.password);
+            // console.log(hashedPassword, "- hashedPassword")
+            if (hashedPassword) {
+                return res.json({
+                    status: 200,
+                    message: "Login successful"
+                })
+            }
+        } else {
+            return res.json({
+                status: 404,
+                message: "Please check your email and password."
+            })
+        }
+
+    } catch (error) {
+        return res.send(error)
+    }
+}
+
+module.exports = { registerUser, loginUser };
